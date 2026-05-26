@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Рацион — Питание и калории</title>
+<style>
+:root {
+  --bg: #F7F6F4;
+  --bg2: #EFEDE9;
+  --white: #FFFFFF;
+  --border: #E0DDD8;
+  --accent: #5C6B5E;
+  --accent2: #7A8C7C;
+  --accent-pale: #EAF0EA;
+  --text: #1E1E1E;
+  --text2: #5A5752;
+  --text3: #8A8580;
+  --shadow: 0 2px 16px rgba(0,0,0,0.07);
+  --radius: 16px;
+  --radius-sm: 10px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.65;font-size:16px}
+
+/* NAV */
+nav{background:var(--white);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;padding:0 20px}
+.nav-inner{max-width:960px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:58px;gap:8px}
+.logo{font-weight:800;color:var(--accent);font-size:1.05rem;white-space:nowrap;letter-spacing:-.3px}
+.nav-links{display:flex;gap:2px;flex-wrap:wrap}
+.nav-links a{text-decoration:none;color:var(--text2);font-size:0.82rem;padding:6px 11px;border-radius:20px;transition:all .2s}
+.nav-links a:hover{background:var(--bg2);color:var(--accent)}
+
+/* HERO */
+.hero{background:var(--accent);color:#fff;text-align:center;padding:56px 20px 44px}
+.hero h1{font-size:clamp(1.5rem,5vw,2.2rem);font-weight:800;margin-bottom:10px;letter-spacing:-.5px}
+.hero p{font-size:.97rem;opacity:.82;max-width:520px;margin:0 auto}
+
+/* SECTIONS */
+.section{padding:52px 20px}
+.section-inner{max-width:960px;margin:0 auto}
+.section.alt{background:var(--bg2)}
+.section-title{font-size:1.25rem;font-weight:800;color:var(--text);margin-bottom:6px}
+.section-sub{color:var(--text2);margin-bottom:28px;font-size:.92rem}
+
+/* THEORY CARDS */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px}
+.card{background:var(--white);border-radius:var(--radius);padding:22px 20px;box-shadow:var(--shadow);border-top:3px solid var(--accent2);transition:transform .2s}
+.card:hover{transform:translateY(-3px)}
+.card-icon{font-size:1.8rem;margin-bottom:10px}
+.card h3{font-size:.97rem;font-weight:700;margin-bottom:6px;color:var(--accent)}
+.card p,.card ul{font-size:.84rem;color:var(--text2)}
+.card ul{padding-left:16px;margin-top:6px}
+.card ul li{margin-bottom:3px}
+.badge{display:inline-block;background:var(--bg2);color:var(--accent);font-size:.72rem;font-weight:700;padding:3px 9px;border-radius:20px;margin-top:8px}
+
+/* CALCULATOR */
+.calc-box{background:var(--white);border-radius:var(--radius);padding:32px;box-shadow:var(--shadow)}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:520px){.form-grid{grid-template-columns:1fr}}
+.form-group{display:flex;flex-direction:column;gap:6px}
+.form-group label{font-size:.82rem;font-weight:600;color:var(--text2)}
+.form-group input,.form-group select{padding:12px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:.97rem;background:var(--bg);color:var(--text);outline:none;transition:border-color .2s;-webkit-appearance:none}
+.form-group input:focus,.form-group select:focus{border-color:var(--accent2)}
+.gender-toggle,.goal-group{display:flex;gap:8px;flex-wrap:wrap}
+.g-btn{flex:1;padding:11px 10px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--bg);font-size:.92rem;font-weight:600;cursor:pointer;transition:all .2s;color:var(--text2)}
+.g-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.goal-btn{padding:9px 16px;border:1.5px solid var(--border);border-radius:20px;background:var(--bg);font-size:.83rem;font-weight:600;cursor:pointer;transition:all .2s;color:var(--text2)}
+.goal-btn.active{background:var(--accent-pale);border-color:var(--accent2);color:var(--accent)}
+.calc-btn{margin-top:22px;width:100%;padding:15px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);font-size:1rem;font-weight:700;cursor:pointer;transition:opacity .2s;letter-spacing:.2px}
+.calc-btn:hover{opacity:.88}
+
+/* RESULT */
+.result-box{margin-top:28px;padding:28px;background:var(--bg);border-radius:var(--radius);border:1.5px solid var(--border);display:none;animation:fadeUp .4s ease}
+.result-box.show{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.result-kcal{text-align:center;margin-bottom:22px}
+.result-kcal .big{font-size:2.8rem;font-weight:800;color:var(--accent)}
+.result-kcal .lbl{font-size:.88rem;color:var(--text2)}
+.result-kcal .goal-lbl{margin-top:6px;font-size:.85rem;color:var(--text2)}
+.bju-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media(max-width:400px){.bju-grid{grid-template-columns:1fr}}
+.bju-card{background:var(--white);border-radius:var(--radius-sm);padding:16px;text-align:center;box-shadow:var(--shadow)}
+.bju-card .val{font-size:1.5rem;font-weight:800;color:var(--accent)}
+.bju-card .unit{font-size:.72rem;color:var(--text3)}
+.bju-card .name{font-size:.83rem;font-weight:600;margin-top:4px}
+.result-note{margin-top:14px;font-size:.8rem;color:var(--text2);text-align:center}
+
+/* DYNAMIC MEAL PLAN */
+.dyn-plan{margin-top:28px;display:none}
+.dyn-plan.show{display:block;animation:fadeUp .5s ease}
+.dyn-title{font-size:1rem;font-weight:700;color:var(--accent);margin-bottom:14px;padding-bottom:8px;border-bottom:1.5px solid var(--border)}
+.meal-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px}
+.meal-card{background:var(--white);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow)}
+.meal-card h3{font-size:.92rem;font-weight:700;color:var(--accent);margin-bottom:12px}
+.meal-row{display:flex;align-items:flex-start;gap:8px;margin-bottom:8px}
+.meal-row .ico{font-size:1rem;flex-shrink:0;margin-top:2px}
+.meal-row .txt{font-size:.82rem;color:var(--text2)}
+.meal-row .txt strong{color:var(--text);font-weight:600}
+.kcal-tag{display:inline-block;background:var(--bg2);color:var(--accent);font-size:.72rem;font-weight:700;padding:2px 8px;border-radius:20px;margin-bottom:10px}
+
+/* STATIC MEAL + CHECKLIST */
+.checklist-box{background:var(--white);border-radius:var(--radius);padding:28px;box-shadow:var(--shadow);margin-top:24px}
+.checklist-box h3{font-size:.97rem;font-weight:700;color:var(--accent);margin-bottom:16px}
+.check-item{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--bg2);cursor:pointer;transition:opacity .2s}
+.check-item:last-child{border-bottom:none}
+.check-item input[type="checkbox"]{display:none}
+.check-box{width:22px;height:22px;border-radius:6px;border:1.5px solid var(--border);background:var(--bg);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s;font-size:13px}
+.check-item.done .check-box{background:var(--accent);border-color:var(--accent)}
+.check-item.done .check-box::after{content:'✓';color:#fff;font-weight:700}
+.check-item.done .check-label{text-decoration:line-through;opacity:.5}
+.check-label{font-size:.88rem;color:var(--text)}
+.prog-bar{height:7px;background:var(--bg2);border-radius:99px;overflow:hidden;margin-top:8px}
+.prog-fill{height:100%;background:var(--accent2);border-radius:99px;transition:width .4s}
+.prog-txt{font-size:.78rem;color:var(--text3);margin-top:12px}
+
+/* PRODUCTS */
+.products-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.prod-card{background:var(--white);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow)}
+.prod-card h4{font-size:.88rem;font-weight:700;color:var(--accent);margin-bottom:12px}
+.prod-item{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--bg2);font-size:.82rem;color:var(--text2)}
+.prod-item:last-child{border-bottom:none}
+.prod-price{background:var(--bg2);color:var(--accent);font-weight:700;font-size:.72rem;padding:2px 8px;border-radius:20px;white-space:nowrap}
+.tip-box{margin-top:18px;background:var(--white);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);font-size:.88rem;color:var(--text2);line-height:1.7}
+
+/* AI CHAT */
+
+/* FAQ */
+.faq-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+.faq-card{background:var(--white);border-radius:var(--radius);padding:24px 22px;box-shadow:var(--shadow);border-top:3px solid var(--accent2)}
+.faq-q{font-size:.97rem;font-weight:700;color:var(--accent);margin-bottom:12px;line-height:1.4}
+.faq-a{font-size:.84rem;color:var(--text2);line-height:1.7}
+.faq-a p{margin-bottom:8px}
+.faq-a ul{padding-left:18px;margin:8px 0}
+.faq-a ul li{margin-bottom:4px}
+.faq-a strong{color:var(--text)}
+
+/* FOOTER */
+footer{background:var(--accent);color:rgba(255,255,255,.65);text-align:center;padding:24px 20px;font-size:.8rem}
+footer strong{color:#fff}
+
+@media(max-width:600px){
+  .calc-box,.checklist-box{padding:18px}
+  .result-box{padding:18px}
+  .section{padding:36px 16px}
+  .msg{max-width:92%}
+  .chat-messages{height:300px}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <div class="logo">Рацион</div>
+    <div class="nav-links">
+      <a href="#theory">Теория</a>
+      <a href="#calc">Калькулятор</a>
+      <a href="#plan">План</a>
+      <a href="#products">Продукты</a>
+      <a href="#faq">Памятки</a>
+    </div>
+  </div>
+</nav>
+
+<div class="hero">
+  <h1>Питание — без лишнего</h1>
+  <p>Разберись в основах, посчитай норму калорий и составь реальный рацион из доступных продуктов</p>
+</div>
+
+<!-- THEORY -->
+<section class="section" id="theory">
+  <div class="section-inner">
+    <div class="section-title">Базовая теория</div>
+    <div class="section-sub">Всё, что нужно знать о питании — в четырёх карточках</div>
+    <div class="cards">
+      <div class="card">
+        <div class="card-icon">⚡</div>
+        <h3>Калории</h3>
+        <p>Единица энергии — как топливо для машины. Организм тратит их круглосуточно: на дыхание, мозг, движение.</p>
+        <ul>
+          <li>Мало калорий → вес снижается</li>
+          <li>Много калорий → вес растёт</li>
+          <li>Норма → вес держится</li>
+        </ul>
+        <span class="badge">4 ккал/г (Б и У) · 9 ккал/г (Ж)</span>
+      </div>
+      <div class="card">
+        <div class="card-icon">🏗️</div>
+        <h3>Белки</h3>
+        <p>Строительный материал тела. Мышцы, кожа, иммунитет — всё строится из белка. Лучше всего держит сытость.</p>
+        <ul>
+          <li>Курица, яйца, творог</li>
+          <li>Рыба (минтай, скумбрия)</li>
+          <li>1.5–2 г на кг веса в день</li>
+        </ul>
+        <span class="badge">4 ккал на 1 г</span>
+      </div>
+      <div class="card">
+        <div class="card-icon">🧠</div>
+        <h3>Жиры</h3>
+        <p>Не враг — топливо для мозга и гормонов. Без жиров гормональная система нарушается, особенно у женщин.</p>
+        <ul>
+          <li>Масло, яичный желток</li>
+          <li>Арахис, скумбрия</li>
+          <li>0.8–1.2 г на кг веса</li>
+        </ul>
+        <span class="badge">9 ккал на 1 г</span>
+      </div>
+      <div class="card">
+        <div class="card-icon">🚀</div>
+        <h3>Углеводы</h3>
+        <p>Главное топливо для мозга и мышц. Выбирай сложные — крупы вместо сахара. Они дают долгую энергию.</p>
+        <ul>
+          <li>Гречка, овсянка, рис</li>
+          <li>Макароны из твёрдых сортов</li>
+          <li>Перловка, ячневая крупа</li>
+        </ul>
+        <span class="badge">4 ккал на 1 г</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CALCULATOR -->
+<section class="section alt" id="calc">
+  <div class="section-inner">
+    <div class="section-title">Калькулятор калорий</div>
+    <div class="section-sub">Формула Миффлина-Сан Жеора — международный стандарт расчёта суточной нормы</div>
+    <div class="calc-box">
+      <div class="form-group" style="margin-bottom:16px">
+        <label>Пол</label>
+        <div class="gender-toggle">
+          <button class="g-btn active" id="g-male" onclick="setGender('male')">Мужчина</button>
+          <button class="g-btn" id="g-female" onclick="setGender('female')">Женщина</button>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="age">Возраст (лет)</label>
+          <input type="number" id="age" placeholder="25" min="15" max="90">
+        </div>
+        <div class="form-group">
+          <label for="weight">Вес (кг)</label>
+          <input type="number" id="weight" placeholder="70" min="30" max="250">
+        </div>
+        <div class="form-group">
+          <label for="height">Рост (см)</label>
+          <input type="number" id="height" placeholder="175" min="100" max="230">
+        </div>
+        <div class="form-group">
+          <label for="activity">Уровень активности</label>
+          <select id="activity">
+            <option value="1.2">Сидячий образ жизни</option>
+            <option value="1.375">Лёгкая активность (1–3 тр/нед)</option>
+            <option value="1.55" selected>Средняя активность (3–5 тр/нед)</option>
+            <option value="1.725">Высокая активность (6–7 тр/нед)</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group" style="margin-top:16px">
+        <label>Цель</label>
+        <div class="goal-group">
+          <button class="goal-btn" id="g-lose" onclick="setGoal('lose')">Похудение</button>
+          <button class="goal-btn active" id="g-keep" onclick="setGoal('keep')">Поддержание</button>
+          <button class="goal-btn" id="g-gain" onclick="setGoal('gain')">Набор мышечной массы</button>
+        </div>
+      </div>
+      <button class="calc-btn" onclick="calculate()">Рассчитать норму</button>
+
+      <!-- RESULT -->
+      <div class="result-box" id="result">
+        <div class="result-kcal">
+          <div class="big" id="res-kcal">—</div>
+          <div class="lbl">ккал в день</div>
+          <div class="goal-lbl" id="res-goal-label"></div>
+        </div>
+        <div class="bju-grid">
+          <div class="bju-card">
+            <div class="val" id="res-p">—</div>
+            <div class="unit">г/день</div>
+            <div class="name">Белки</div>
+          </div>
+          <div class="bju-card">
+            <div class="val" id="res-f">—</div>
+            <div class="unit">г/день</div>
+            <div class="name">Жиры</div>
+          </div>
+          <div class="bju-card">
+            <div class="val" id="res-c">—</div>
+            <div class="unit">г/день</div>
+            <div class="name">Углеводы</div>
+          </div>
+        </div>
+        <div class="result-note" id="res-note"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DYNAMIC + STATIC PLAN -->
+<section class="section" id="plan">
+  <div class="section-inner">
+    <div class="section-title">План питания</div>
+    <div class="section-sub">После расчёта — персональный план под вашу калорийность. Ниже — чеклист привычек.</div>
+
+    <!-- DYNAMIC PLAN (appears after calc) -->
+    <div class="dyn-plan" id="dyn-plan">
+      <div class="dyn-title" id="dyn-plan-title">📋 Ваш план на день</div>
+      <div class="meal-grid" id="dyn-meal-grid"></div>
+    </div>
+
+    <!-- Placeholder before calc -->
+    <div id="plan-placeholder" style="background:var(--white);border-radius:var(--radius);padding:32px;box-shadow:var(--shadow);text-align:center;color:var(--text2);font-size:.92rem">
+      ☝️ Сначала рассчитайте калорийность в калькуляторе выше — здесь появится персональный план питания под вашу норму
+    </div>
+
+    <!-- CHECKLIST -->
+    <div class="checklist-box">
+      <h3>Чеклист полезных привычек на сегодня</h3>
+      <div id="checklist">
+        <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox"><div class="check-box"></div><span class="check-label">💧 Выпить 1.5–2 литра воды в течение дня</span></label>
+        <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox"><div class="check-box"></div><span class="check-label">🥩 Добрать норму белка (яйца, творог, мясо, рыба)</span></label>
+        <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox"><div class="check-box"></div><span class="check-label">🚫 Не перекусывать на ходу — есть сидя, не спеша</span></label>
+        <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox"><div class="check-box"></div><span class="check-label">🥗 Съесть порцию овощей (капуста, морковь, огурец)</span></label>
+        <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox"><div class="check-box"></div><span class="check-label">☕ Не добавлять сахар в чай и кофе</span></label>
+        <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox"><div class="check-box"></div><span class="check-label">🚶 30 минут ходьбы или любой лёгкой активности</span></label>
+        <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox"><div class="check-box"></div><span class="check-label">🍽️ Не пропустить ни один основной приём пищи</span></label>
+        <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox"><div class="check-box"></div><span class="check-label">🌙 Последний приём пищи за 2–3 часа до сна</span></label>
+      </div>
+      <div class="prog-txt" id="prog-txt">Выполнено: 0 из 8</div>
+      <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- PRODUCTS -->
+<section class="section alt" id="products">
+  <div class="section-inner">
+    <div class="section-title">Продукты — Казахстан</div>
+    <div class="section-sub">Правильное питание без дорогих суперфудов. Эти продукты закрывают все потребности в БЖУ</div>
+    <div class="products-grid">
+      <div class="prod-card">
+        <h4>Источники белка</h4>
+        <div class="prod-item"><span>Куриные окорочка / голени</span><span class="prod-price">1300–1700 ₸/кг</span></div>
+        <div class="prod-item"><span>Яйца 1 категории (10 шт)</span><span class="prod-price">550–600 ₸</span></div>
+        <div class="prod-item"><span>Творог 5–9% (развес)</span><span class="prod-price">1800–2200 ₸/кг</span></div>
+        <div class="prod-item"><span>Минтай мороженый</span><span class="prod-price">~900 ₸/кг</span></div>
+        <div class="prod-item"><span>Скумбрия / Сельдь</span><span class="prod-price">1200–1800 ₸/кг</span></div>
+      </div>
+      <div class="prod-card">
+        <h4>Источники углеводов</h4>
+        <div class="prod-item"><span>Гречневая крупа</span><span class="prod-price">380–430 ₸/кг</span></div>
+        <div class="prod-item"><span>Овсяные хлопья</span><span class="prod-price">300–500 ₸/кг</span></div>
+        <div class="prod-item"><span>Рис шлифованный</span><span class="prod-price">250–400 ₸/кг</span></div>
+        <div class="prod-item"><span>Макароны (твёрдые сорта)</span><span class="prod-price">350–540 ₸/кг</span></div>
+        <div class="prod-item"><span>Перловка / Ячневая крупа</span><span class="prod-price">200–300 ₸/кг</span></div>
+      </div>
+      <div class="prod-card">
+        <h4>Жиры и клетчатка</h4>
+        <div class="prod-item"><span>Раст. масло нерафинированное</span><span class="prod-price">450–600 ₸/л</span></div>
+        <div class="prod-item"><span>Сливочное масло 72–82%</span><span class="prod-price">~800 ₸/180г</span></div>
+        <div class="prod-item"><span>Арахис (рынок)</span><span class="prod-price">1200–1500 ₸/кг</span></div>
+        <div class="prod-item"><span>Капуста белокочанная</span><span class="prod-price">120–200 ₸/кг</span></div>
+        <div class="prod-item"><span>Борщевой набор (морковь, лук)</span><span class="prod-price">120–250 ₸/кг</span></div>
+      </div>
+    </div>
+    <div class="tip-box">
+      💡 <strong>Экономия:</strong> На базарах крупы, творог и яйца на развес стоят на 20–30% дешевле, чем в упаковках в супермаркетах. Готовя дома, реально уложиться в <strong>1 500–2 000 ₸ в день</strong> при полноценном рационе.
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="section" id="faq">
+  <div class="section-inner">
+    <div class="section-title">Памятки и ответы на частые вопросы</div>
+    <div class="section-sub">Развёрнутые ответы на самые популярные вопросы о питании</div>
+    <div class="faq-grid">
+      <div class="faq-card">
+        <div class="faq-q">Как набрать мышечную массу на бюджете?</div>
+        <div class="faq-a">
+          <p>Ключ — профицит калорий и достаточный белок. Вот простая формула:</p>
+          <ul>
+            <li><strong>Калории:</strong> увеличь норму на 10–15% (калькулятор выше сделает это автоматически)</li>
+            <li><strong>Белок:</strong> 1.8–2.2 г на кг веса — куриные окорочка, яйца, творог</li>
+            <li><strong>Углеводы:</strong> рис, гречка, макароны — ешь больше порций</li>
+            <li><strong>Тренировки:</strong> силовые 3–4 раза в неделю — без них калории пойдут в жир</li>
+            <li><strong>Перекусы:</strong> добавь арахис, бананы, творог между приёмами пищи</li>
+          </ul>
+          <p>Бюджетные продукты для набора: куриные окорочка, яйца, творог, гречка, макароны, арахис.</p>
+        </div>
+      </div>
+      <div class="faq-card">
+        <div class="faq-q">Что есть до и после тренировки?</div>
+        <div class="faq-a">
+          <p><strong>За 1.5–2 часа до тренировки:</strong></p>
+          <ul>
+            <li>Сложные углеводы — гречка, рис, овсянка (дают энергию)</li>
+            <li>Белок — курица, яйца (защищает мышцы от распада)</li>
+            <li>Избегай жирной пищи — она медленно переваривается</li>
+          </ul>
+          <p><strong>Сразу после тренировки (в течение 30–60 мин):</strong></p>
+          <ul>
+            <li>Быстрый белок — творог, яйца, куриная грудка</li>
+            <li>Углеводы — банан, рис, овсянка (восполняют запасы гликогена)</li>
+            <li>Пример: творог 5% (200 г) + банан</li>
+          </ul>
+        </div>
+      </div>
+      <div class="faq-card">
+        <div class="faq-q">Как похудеть без чувства голода?</div>
+        <div class="faq-a">
+          <p>Голод — главный враг похудения. Вот как его избежать:</p>
+          <ul>
+            <li><strong>Больше белка:</strong> 1.5–2 г на кг веса — держит сытость дольше всего</li>
+            <li><strong>Больше клетчатки:</strong> капуста, огурцы, морковь — объёмная, но низкокалорийная пища</li>
+            <li><strong>Вода:</strong> 1.5–2 литра в день — часто жажду путают с голодом</li>
+            <li><strong>Медленное поедание:</strong> за 20 минут — мозг успевает получить сигнал сытости</li>
+            <li><strong>Никаких жидких калорий:</strong> соки, газировки, сладкий чай — пустые калории без сытости</li>
+            <li><strong>Сон:</strong> 7–8 часов — недосып повышает аппетит на 20–30%</li>
+          </ul>
+        </div>
+      </div>
+      <div class="faq-card">
+        <div class="faq-q">Чем заменить дорогой протеин в Казахстане?</div>
+        <div class="faq-a">
+          <p>Спортивный протеин — удобно, но не обязательно. Вот бюджетные альтернативы:</p>
+          <ul>
+            <li><strong>Яйца:</strong> 2 белка + 1 желток = ~12 г белка, стоит копейки</li>
+            <li><strong>Творог 5–9%:</strong> 200 г = ~20–25 г белка, дешевле любого протеина</li>
+            <li><strong>Куриные окорочка:</strong> 150 г = ~30 г белка, самый доступный источник</li>
+            <li><strong>Минтай:</strong> 150 г = ~25 г белка, дешёвая рыба</li>
+            <li><strong>Кефир:</strong> 500 мл = ~15 г белка + пробиотики</li>
+          </ul>
+          <p>Для набора массы: ешь больше порций. Для похудения: творог и кефир — лучший выбор.</p>
+        </div>
+      </div>
+      <div class="faq-card">
+        <div class="faq-q">Почему я не худею при дефиците калорий?</div>
+        <div class="faq-a">
+          <p>Если вес стоит — проверь эти пункты:</p>
+          <ul>
+            <li><strong>Недооценка порций:</strong> ложка масла в салат = +100 ккал, которых ты не учёл</li>
+            <li><strong>Жидкие калории:</strong> сахар в чае, соки, алкоголь — легко забыть посчитать</li>
+            <li><strong>Недосып:</strong> меньше 7 часов сна = гормональные сбои = задержка жира</li>
+            <li><strong>Стресс:</strong> кортизол задерживает воду и тормозит сжигание жира</li>
+            <li><strong>Плато:</strong> организм адаптировался — сделай перерыв 1–2 недели на поддержание, потом вернись к дефициту</li>
+            <li><strong>Месячные:</strong> у женщин вес может колебаться ±2 кг из-за задержки воды</li>
+          </ul>
+          <p>Взвешивайся 1 раз в неделю утром после туалета — это самый точный способ.</p>
+        </div>
+      </div>
+      <div class="faq-card">
+        <div class="faq-q">Сколько воды пить и почему это важно?</div>
+        <div class="faq-a">
+          <p>Норма — <strong>30–35 мл на кг веса</strong> в день (при 70 кг ≈ 2–2.5 литра).</p>
+          <ul>
+            <li>Вода участвует в расщеплении жиров (липолиз)</li>
+            <li>Жажду часто принимают за голод — выпей стакан перед едой</li>
+            <li>Помогает выводить продукты обмена и токсины</li>
+            <li>Улучшает работу мышц и суставов</li>
+            <li>Повышает концентрацию и энергию</li>
+          </ul>
+          <p>Считай чистую воду, чай без сахара, кофе. Не считай: соки, газировки, алкоголь.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <strong>Рацион</strong> — информационный сервис о питании<br>
+  <span style="font-size:.74rem;margin-top:4px;display:block">Носит информационный характер. При наличии заболеваний проконсультируйтесь с врачом.</span>
+</footer>
+
+<script>
+// ===== STATE =====
+let gender = 'male', goal = 'keep';
+let lastKcal = 0;
+
+function setGender(g) {
+  gender = g;
+  document.getElementById('g-male').classList.toggle('active', g==='male');
+  document.getElementById('g-female').classList.toggle('active', g==='female');
+}
+function setGoal(g) {
+  goal = g;
+  ['lose','keep','gain'].forEach(x => document.getElementById('g-'+x).classList.toggle('active', x===g));
+}
+
+// ===== CALCULATOR =====
+function calculate() {
+  const age = parseFloat(document.getElementById('age').value);
+  const weight = parseFloat(document.getElementById('weight').value);
+  const height = parseFloat(document.getElementById('height').value);
+  const act = parseFloat(document.getElementById('activity').value);
+  if (!age||!weight||!height||age<10||weight<30||height<100) {
+    alert('Заполни все поля корректными значениями.');
+    return;
+  }
+  let bmr = gender==='male'
+    ? (10*weight)+(6.25*height)-(5*age)+5
+    : (10*weight)+(6.25*height)-(5*age)-161;
+  let tdee = bmr * act;
+  let goalLabel='', goalNote='';
+  if (goal==='lose') {
+    tdee *= 0.87;
+    goalLabel = 'Цель: похудение (дефицит ~13%)';
+    goalNote = 'Акцент на белке и клетчатке. Убирай жидкие калории: соки, газировки, сахар в напитках.';
+  } else if (goal==='gain') {
+    tdee *= (gender==='male' ? 1.12 : 1.08);
+    goalLabel = 'Цель: набор мышечной массы (профицит)';
+    goalNote = 'Ешь чаще, выбирай более калорийные продукты. Акцент на углеводах и белке. Обязательно силовые тренировки 3–4 раза в неделю — без них калории пойдут в жир, а не в мышцы.';
+  } else {
+    goalLabel = 'Цель: поддержание веса';
+    goalNote = 'Правило тарелки: ½ — овощи, ¼ — белок, ¼ — сложные углеводы.';
+  }
+  const kcal = Math.round(tdee);
+  lastKcal = kcal;
+  const protein = Math.round((kcal*0.20)/4);
+  const fat     = Math.round((kcal*0.30)/9);
+  const carbs   = Math.round((kcal*0.50)/4);
+
+  document.getElementById('res-kcal').textContent = kcal.toLocaleString('ru');
+  document.getElementById('res-goal-label').textContent = goalLabel;
+  document.getElementById('res-p').textContent = protein;
+  document.getElementById('res-f').textContent = fat;
+  document.getElementById('res-c').textContent = carbs;
+  document.getElementById('res-note').textContent = goalNote;
+
+  const box = document.getElementById('result');
+  box.classList.remove('show');
+  void box.offsetWidth;
+  box.classList.add('show');
+  setTimeout(() => box.scrollIntoView({behavior:'smooth',block:'nearest'}), 100);
+
+  // Build dynamic meal plan
+  buildMealPlan(kcal, protein, fat, carbs, goal);
+}
+
+// ===== DYNAMIC MEAL PLAN BUILDER =====
+function buildMealPlan(kcal, protein, fat, carbs, goal) {
+  // Proportions per meal: Breakfast 25%, Lunch 35%, Dinner 25%, Snack 15%
+  const meals = [
+    { name: '🌅 Завтрак', pct: 0.25, key: 'breakfast' },
+    { name: '☀️ Обед',    pct: 0.35, key: 'lunch' },
+    { name: '🌙 Ужин',    pct: 0.25, key: 'dinner' },
+    { name: '🍎 Перекус', pct: 0.15, key: 'snack' },
+  ];
+
+  // Food options by goal
+  const foods = {
+    breakfast: {
+      lose: [
+        {ico:'🥣', txt:'<strong>Углеводы:</strong> Овсянка на воде (50 г сухой)'},
+        {ico:'🥚', txt:'<strong>Белок:</strong> Омлет из 2 яиц (1 желток убрать)'},
+        {ico:'🥬', txt:'<strong>Клетчатка:</strong> Свежий огурец или капуста'},
+      ],
+      keep: [
+        {ico:'🥣', txt:'<strong>Углеводы:</strong> Овсянка на молоке (60 г сухой)'},
+        {ico:'🥚', txt:'<strong>Белок:</strong> 2 варёных яйца'},
+        {ico:'🥜', txt:'<strong>Жиры:</strong> Горсть арахиса (20 г)'},
+      ],
+      gain: [
+        {ico:'🥣', txt:'<strong>Углеводы:</strong> Овсянка на молоке (80 г) + банан'},
+        {ico:'🥚', txt:'<strong>Белок:</strong> 3 яйца целиком'},
+        {ico:'🥜', txt:'<strong>Жиры:</strong> Арахис (30 г) или ложка масла'},
+      ],
+    },
+    lunch: {
+      lose: [
+        {ico:'🍗', txt:'<strong>Белок:</strong> Куриная грудка варёная/запечённая (150 г)'},
+        {ico:'🥗', txt:'<strong>Клетчатка:</strong> Большой салат из капусты + морковь + огурец'},
+        {ico:'🌾', txt:'<strong>Углеводы:</strong> Гречка варёная (100 г) — умеренно'},
+      ],
+      keep: [
+        {ico:'🍗', txt:'<strong>Белок:</strong> Куриные бёдра / минтай запечённый (150 г)'},
+        {ico:'🍚', txt:'<strong>Углеводы:</strong> Рис или гречка варёная (150 г)'},
+        {ico:'🥗', txt:'<strong>Клетчатка:</strong> Салат из капусты + морковь + масло'},
+      ],
+      gain: [
+        {ico:'🍗', txt:'<strong>Белок:</strong> Куриные окорочка запечённые (200 г)'},
+        {ico:'🍝', txt:'<strong>Углеводы:</strong> Макароны из твёрдых сортов или рис (200 г)'},
+        {ico:'🥗', txt:'<strong>Клетчатка:</strong> Салат с ложкой растительного масла'},
+      ],
+    },
+    dinner: {
+      lose: [
+        {ico:'🐟', txt:'<strong>Белок:</strong> Минтай на пару или запечённый (150 г)'},
+        {ico:'🥦', txt:'<strong>Клетчатка:</strong> Тушёная капуста или кабачки (200 г)'},
+        {ico:'🫙', txt:'Минимум углеводов вечером'},
+      ],
+      keep: [
+        {ico:'🐠', txt:'<strong>Белок:</strong> Скумбрия / сельдь запечённая (150 г)'},
+        {ico:'🌾', txt:'<strong>Углеводы:</strong> Гречка варёная (100 г)'},
+        {ico:'🥦', txt:'<strong>Клетчатка:</strong> Тушёные овощи (кабачок, фасоль)'},
+      ],
+      gain: [
+        {ico:'🍗', txt:'<strong>Белок:</strong> Куриные бёдра или скумбрия (180 г)'},
+        {ico:'🍚', txt:'<strong>Углеводы:</strong> Рис или перловка варёная (150 г)'},
+        {ico:'🥦', txt:'<strong>Клетчатка:</strong> Тушёные овощи с маслом'},
+      ],
+    },
+    snack: {
+      lose: [
+        {ico:'🧀', txt:'<strong>Белок:</strong> Творог 5% (150 г) без добавок'},
+        {ico:'🥛', txt:'Кефир 1% (200 мл) — пробиотики + лёгкий белок'},
+      ],
+      keep: [
+        {ico:'🧀', txt:'<strong>Белок:</strong> Творог 5–9% (150 г)'},
+        {ico:'🥜', txt:'<strong>Жиры:</strong> Арахис (25 г)'},
+      ],
+      gain: [
+        {ico:'🧀', txt:'<strong>Белок:</strong> Творог со сметаной (200 г)'},
+        {ico:'🥜', txt:'<strong>Жиры:</strong> Арахис (40 г)'},
+        {ico:'🍌', txt:'<strong>Углеводы:</strong> Банан или горсть изюма'},
+      ],
+    },
+  };
+
+  const grid = document.getElementById('dyn-meal-grid');
+  grid.innerHTML = '';
+
+  meals.forEach(m => {
+    const mKcal = Math.round(kcal * m.pct);
+    const rows = foods[m.key][goal];
+    let rowsHtml = rows.map(r => `<div class="meal-row"><span class="ico">${r.ico}</span><div class="txt">${r.txt}</div></div>`).join('');
+    grid.innerHTML += `
+      <div class="meal-card">
+        <div class="kcal-tag">~${mKcal} ккал</div>
+        <h3>${m.name}</h3>
+        ${rowsHtml}
+      </div>`;
+  });
+
+  document.getElementById('dyn-plan-title').textContent = `План на день — ${kcal.toLocaleString('ru')} ккал`;
+  document.getElementById('plan-placeholder').style.display = 'none';
+  const plan = document.getElementById('dyn-plan');
+  plan.classList.remove('show');
+  void plan.offsetWidth;
+  plan.classList.add('show');
+  setTimeout(() => document.getElementById('plan').scrollIntoView({behavior:'smooth',block:'start'}), 200);
+}
+
+// ===== CHECKLIST =====
+function toggleCheck(el) {
+  el.classList.toggle('done');
+  const done = document.querySelectorAll('.check-item.done').length;
+  const total = document.querySelectorAll('.check-item').length;
+  document.getElementById('prog-txt').textContent = `Выполнено: ${done} из ${total}`;
+  document.getElementById('prog-fill').style.width = Math.round((done/total)*100) + '%';
+}
+
+
+</script>
+</body>
+</html>
